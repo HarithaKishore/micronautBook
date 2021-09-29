@@ -9,6 +9,7 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Slf4j
 @Singleton
@@ -21,13 +22,13 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book findByName(String name) {
-        return bookRepository.findByName(name);
+        return bookRepository.findByName(name).get();
     }
 
     @Override
     public Boolean add(AddBookRequest request) throws Exception{
-        Book book = bookRepository.findByName(request.getName());
-        if(book!=null) {
+        Optional<Book> book = bookRepository.findByName(request.getName());
+        if(book.isPresent()) {
             log.error("Book with name {} already exists", request.getName());
             throw new Exception("Book with name " + request.getName() + " already exist");
         }
@@ -43,8 +44,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Boolean deleteByName(String name) throws Exception{
-        Book book = bookRepository.findByName(name);
-        if(null == book) {
+        Optional<Book> book = bookRepository.findByName(name);
+        if(!book.isPresent()) {
             log.error("Book with name {} not available", name);
             throw new Exception("Book with name:" + name + " not available");
         }
@@ -56,11 +57,12 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(rollbackOn = Exception.class)
     public Boolean update(UpdateBookRequest request) throws Exception {
-        Book book = bookRepository.findByName(request.getName());
-        if(null == book) {
+        Optional<Book> bookOptional = bookRepository.findByName(request.getName());
+        if(!bookOptional.isPresent()) {
             log.error("Book with name {} not available", request.getName());
             throw new Exception("Book with name:" + request.getName() + " not available");
         }
+        Book book = bookOptional.get();
         log.info("Updating the book with name {}", request.getName());
         book.setCategory(request.getCategory());
         book.setSellingPrice(request.getSellingPrice());
