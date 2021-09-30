@@ -2,10 +2,13 @@ package buddy_project.controller;
 
 import buddy_project.entity.Book;
 import buddy_project.request.AddBookRequest;
+import buddy_project.request.FilterBookRequest;
 import buddy_project.request.UpdateBookRequest;
 import buddy_project.response.BooleanResponse;
 import buddy_project.service.BookService;
 import io.micronaut.http.annotation.*;
+
+import java.util.List;
 
 @Controller(value = "/book")
 public class BookController {
@@ -50,4 +53,10 @@ public class BookController {
             return new BooleanResponse(false, e.getMessage());
         }
     }
+
+    @Post(value = "/filter")
+    public List<Book> filter(FilterBookRequest filterBookRequest) {
+        return bookService.filter(filterBookRequest);
+    }
+
 }
